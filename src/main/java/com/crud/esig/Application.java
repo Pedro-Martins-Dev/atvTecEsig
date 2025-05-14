@@ -27,4 +27,8 @@ public class Application implements CommandLineRunner
 	{
 		main.menu();
 	}
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> b7d63ae (fiz rodar o back sem as telas)

@@ -58,4 +58,8 @@ public class Main
         usuarioService.listarTodos().forEach(usuario ->
                 System.out.println("Usuário: " + usuario.getNome()));
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> b7d63ae (fiz rodar o back sem as telas)
