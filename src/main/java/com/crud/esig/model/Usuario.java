@@ -12,6 +12,8 @@ public class Usuario
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String nome;
+
+    @OneToMany(mappedBy = "usuarioResponsavel", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Tarefa> tarefas;
 
     public Usuario(){}

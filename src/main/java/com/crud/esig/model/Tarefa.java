@@ -24,7 +24,8 @@ public class Tarefa
 
     public Tarefa() {}
 
-    public Tarefa(String titulo, String descricao, Usuario usuarioResponsavel, LocalDate dataCadastro, LocalDate dataConclusaoPrevista) {
+    public Tarefa(String titulo, String descricao, Usuario usuarioResponsavel, LocalDate dataCadastro, LocalDate dataConclusaoPrevista)
+    {
         this.titulo = titulo;
         this.descricao = descricao;
         this.usuarioResponsavel = usuarioResponsavel;
@@ -32,7 +33,8 @@ public class Tarefa
         this.dataConclusaoPrevista = dataConclusaoPrevista;
     }
 
-    public Long getId() {
+    public Long getId()
+    {
         return id;
     }
 
@@ -60,31 +62,38 @@ public class Tarefa
         return usuarioResponsavel;
     }
 
-    public void setUsuarioResponsavel(Usuario usuarioResponsavel) {
+    public void setUsuarioResponsavel(Usuario usuarioResponsavel)
+    {
         this.usuarioResponsavel = usuarioResponsavel;
     }
 
-    public LocalDate getDataCadastro() {
+    public LocalDate getDataCadastro()
+    {
         return dataCadastro;
     }
 
-    public void setDataCadastro(LocalDate dataCadastro) {
+    public void setDataCadastro(LocalDate dataCadastro)
+    {
         this.dataCadastro = dataCadastro;
     }
 
-    public LocalDate getDataConclusaoPrevista() {
+    public LocalDate getDataConclusaoPrevista()
+    {
         return dataConclusaoPrevista;
     }
 
-    public void setDataConclusaoPrevista(LocalDate dataConclusaoPrevista) {
+    public void setDataConclusaoPrevista(LocalDate dataConclusaoPrevista)
+    {
         this.dataConclusaoPrevista = dataConclusaoPrevista;
     }
 
-    public LocalDate getDataConclusao() {
+    public LocalDate getDataConclusao()
+    {
         return dataConclusao;
     }
 
-    public void setDataConclusao(LocalDate dataConclusao) {
+    public void setDataConclusao(LocalDate dataConclusao)
+    {
         this.dataConclusao = dataConclusao;
     }
 }

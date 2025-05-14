@@ -2,23 +2,19 @@ package com.crud.esig.bean;
 
 import com.crud.esig.model.Usuario;
 import com.crud.esig.service.UsuarioService;
-import jakarta.annotation.ManagedBean;
+import jakarta.enterprise.context.SessionScoped;
+import jakarta.inject.Named;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
-@Component
-@Scope("request")
-public class UsuarioBean {
-    @Autowired
-    private UsuarioService usuarioService;
+import java.io.Serializable;
 
+@Named("usuarioBean")
+@SessionScoped
+public class UsuarioBean implements Serializable {
     private Usuario usuario = new Usuario();
 
-    public void salvar() {
-        usuarioService.salvar(usuario);
-        usuario = new Usuario(); // Limpa o formulário
-    }
+    @Autowired
+    private UsuarioService usuarioService;
 
     public Usuario getUsuario() {
         return usuario;
@@ -26,6 +22,11 @@ public class UsuarioBean {
 
     public void setUsuario(Usuario usuario) {
         this.usuario = usuario;
+    }
+
+    public void salvar() {
+        usuarioService.salvar(usuario);
+        usuario = new Usuario(); // Limpar campos após salvar
     }
 }
 

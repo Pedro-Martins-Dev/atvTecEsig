@@ -1,7 +1,7 @@
 package com.crud.esig.service;
 
 import com.crud.esig.model.Usuario;
-import com.crud.esig.repository.*;
+import com.crud.esig.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,8 +10,13 @@ import java.util.List;
 @Service
 public class UsuarioService
 {
+    private final UsuarioRepository usuarioRepository;
+
     @Autowired
-    private UsuarioRepository usuarioRepository;
+    public UsuarioService(UsuarioRepository usuarioRepository)
+    {
+        this.usuarioRepository = usuarioRepository;
+    }
 
     public List<Usuario> listarTodos()
     {
@@ -29,7 +34,7 @@ public class UsuarioService
     }
 
     public void deletar(Long id)
-    {
+        {
         usuarioRepository.deleteById(id);
     }
 }
