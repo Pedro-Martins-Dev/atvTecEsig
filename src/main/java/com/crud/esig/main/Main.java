@@ -55,8 +55,4 @@ public class Main {
             }
         }
     }
-
-    private void listarUsuarios() {
-
-    }
 }
