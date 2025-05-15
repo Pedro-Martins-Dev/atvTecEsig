@@ -7,28 +7,20 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class Application implements CommandLineRunner
-{
+public class Application implements CommandLineRunner {
 	private final Main main;
 
 	@Autowired
-	public Application(Main main)
-	{
+	public Application(Main main) {
 		this.main = main;
 	}
 
-	public static void main(String[] args)
-	{
+	public static void main(String[] args) {
 		SpringApplication.run(Application.class, args);
 	}
 
 	@Override
-	public void run(String... args)
-	{
+	public void run(String... args) {
 		main.menu();
 	}
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> b7d63ae (fiz rodar o back sem as telas)

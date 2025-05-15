@@ -1,5 +1,6 @@
 package com.crud.esig.model;
 
+import com.crud.esig.enuns.Prioridades;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 
@@ -14,6 +15,9 @@ public class Tarefa
     private String titulo;
     private String descricao;
 
+    @Enumerated
+    private Prioridades prioridade;
+
     @ManyToOne
     @JoinColumn(name = "usuario_id")
     private Usuario usuarioResponsavel;
@@ -24,12 +28,13 @@ public class Tarefa
 
     public Tarefa() {}
 
-    public Tarefa(String titulo, String descricao, Usuario usuarioResponsavel, LocalDate dataCadastro, LocalDate dataConclusaoPrevista)
+    public Tarefa(String titulo, String descricao, Prioridades prioridade, Usuario usuarioResponsavel, LocalDate dataConclusaoPrevista)
     {
         this.titulo = titulo;
         this.descricao = descricao;
+        this.prioridade = prioridade;
         this.usuarioResponsavel = usuarioResponsavel;
-        this.dataCadastro = dataCadastro;
+        this.dataCadastro = LocalDate.now();
         this.dataConclusaoPrevista = dataConclusaoPrevista;
     }
 
