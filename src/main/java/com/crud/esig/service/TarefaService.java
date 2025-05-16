@@ -77,7 +77,7 @@ public class TarefaService
                         continue;
                     case 2:
                         System.out.println("Voltando ao menu...");
-                        return new Usuario("Padrão"); // Retorna um usuário padrão caso o método não possa continuar
+                        return new Usuario("Padrão");
                     case 3:
                         System.out.println("Digite o nome do novo usuário: ");
                         String novoNome = scanner.nextLine();
@@ -114,7 +114,7 @@ public class TarefaService
                 }
             }
         }
-        return usuarioResponsavel; // Agora há sempre um retorno válido do tipo Usuario
+        return usuarioResponsavel; 
     }
 
     public void cadastrarTarefa(UsuarioService usuarioService, TarefaService tarefaService) {
