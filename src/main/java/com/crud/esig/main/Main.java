@@ -30,6 +30,7 @@ public class Main {
                     
                     1 - Cadastrar um usuário
                     2 - Cadastrar tarefa
+                    3 - Atualizar status da tarefa
                     0 - Sair""");
 
             opcao = scanner.nextInt();
@@ -44,8 +45,10 @@ public class Main {
                     tarefaService.cadastrarTarefa(usuarioService, tarefaService);
 
                     break;
-                case 0:
 
+                    case 3:
+                    tarefaService.atualizarTarefa(usuarioService);
+                case 0:
                     System.out.println("Saindo...");
                     break;
                 default:

@@ -56,4 +56,77 @@ public class UsuarioService
     public List<Usuario> buscarPorNomeContendo(String nomeParcial) {
         return usuarioRepository.findByNomeContainingIgnoreCase(nomeParcial);
     }
+
+    public Usuario buscarUsuarioPorNome(UsuarioService usuarioService, TarefaService tarefaService, Scanner scanner) 
+    {
+        Usuario usuarioResponsavel = null;
+
+        while (usuarioResponsavel == null) {
+            System.out.println("Insira o nome do responsável: ");
+            String nomeParcial = scanner.nextLine();
+
+            List<Usuario> usuariosEncontrados = buscarPorNomeContendo(nomeParcial);
+
+            if (usuariosEncontrados.isEmpty()) {
+                System.out.println("Nenhum usuário encontrado com esse nome.");
+                System.out.println("""
+                        Escolha uma opção:
+                        1 - Tentar buscar novamente
+                        2 - Voltar para o menu
+                        3 - Cadastrar um novo usuário
+                        """);
+
+                String escolhaStr = scanner.nextLine();
+                int escolha;
+                try {
+                    escolha = Integer.parseInt(escolhaStr);
+                } catch (NumberFormatException e) {
+                    System.out.println("Opção inválida. Tente novamente.");
+                    continue;
+                }
+
+                switch (escolha) {
+                    case 1:
+                        continue;
+                    case 2:
+                        System.out.println("Voltando ao menu...");
+                        return new Usuario("Padrão");
+                    case 3:
+                        System.out.println("Digite o nome do novo usuário: ");
+                        String novoNome = scanner.nextLine();
+                        Usuario novoUsuario = new Usuario(novoNome);
+                        usuarioService.salvarUsuario(novoUsuario);
+                        usuarioResponsavel = novoUsuario;
+                        System.out.println("Usuário cadastrado com sucesso!");
+                        break;
+                    default:
+                        System.out.println("Opção inválida. Tente novamente.");
+                }
+            } else {
+                System.out.println("Usuários encontrados:");
+                for (int i = 0; i < usuariosEncontrados.size(); i++) {
+                    System.out.println((i + 1) + " - " + usuariosEncontrados.get(i).getNome());
+                }
+
+                System.out.println("Escolha um usuário pelo número correspondente:");
+                String escolhaUsuarioStr = scanner.nextLine();
+                int escolhaUsuario;
+
+                try {
+                    escolhaUsuario = Integer.parseInt(escolhaUsuarioStr);
+                } catch (NumberFormatException e) {
+                    System.out.println("Opção inválida. Tente novamente.");
+                    continue;
+                }
+
+                if (escolhaUsuario > 0 && escolhaUsuario <= usuariosEncontrados.size()) {
+                    usuarioResponsavel = usuariosEncontrados.get(escolhaUsuario - 1);
+                } else {
+                    System.out.println("Opção inválida. Tente novamente.");
+                    usuarioResponsavel = null;
+                }
+            }
+        }
+        return usuarioResponsavel; 
+    }
 }
