@@ -16,7 +16,6 @@ import java.util.Scanner;
 @Service
 public class TarefaService
 {
-    private static final Scanner scanner = new Scanner(System.in);
     @Autowired
     private TarefaRepository tarefaRepository;
 
@@ -45,20 +44,12 @@ public class TarefaService
         tarefaRepository.deleteById(id);
     }
 
-
-    public void cadastrarTarefa(UsuarioService usuarioService, TarefaService tarefaService) {
-        Scanner scanner = new Scanner(System.in);
-
-        System.out.println("Digite o nome da tarefa: ");
-        String titulo = scanner.nextLine();
-
-        System.out.println("Insira a descrição da tarefa: ");
-        String descricao = scanner.nextLine();
-
+    public Usuario buscarUsuarioPorNome(UsuarioService usuarioService, TarefaService tarefaService, Scanner scanner) 
+    {
         Usuario usuarioResponsavel = null;
 
         while (usuarioResponsavel == null) {
-            System.out.println("Insira parte do nome do responsável: ");
+            System.out.println("Insira o nome do responsável: ");
             String nomeParcial = scanner.nextLine();
 
             List<Usuario> usuariosEncontrados = usuarioService.buscarPorNomeContendo(nomeParcial);
@@ -71,23 +62,32 @@ public class TarefaService
                         2 - Voltar para o menu
                         3 - Cadastrar um novo usuário
                         """);
-                int escolha = scanner.nextInt();
-                scanner.nextLine(); // Consumir quebra de linha
 
-                if (escolha == 1) {
-                    continue; // Volta para o início do loop
-                } else if (escolha == 2) {
-                    System.out.println("Voltando ao menu...");
-                    return;
-                } else if (escolha == 3) {
-                    System.out.println("Digite o nome do novo usuário: ");
-                    String novoNome = scanner.nextLine();
-                    Usuario novoUsuario = new Usuario(novoNome);
-                    usuarioService.salvarUsuario(novoUsuario);
-                    usuarioResponsavel = novoUsuario;
-                    System.out.println("Usuário cadastrado com sucesso!");
-                } else {
+                String escolhaStr = scanner.nextLine();
+                int escolha;
+                try {
+                    escolha = Integer.parseInt(escolhaStr);
+                } catch (NumberFormatException e) {
                     System.out.println("Opção inválida. Tente novamente.");
+                    continue;
+                }
+
+                switch (escolha) {
+                    case 1:
+                        continue;
+                    case 2:
+                        System.out.println("Voltando ao menu...");
+                        return new Usuario("Padrão"); // Retorna um usuário padrão caso o método não possa continuar
+                    case 3:
+                        System.out.println("Digite o nome do novo usuário: ");
+                        String novoNome = scanner.nextLine();
+                        Usuario novoUsuario = new Usuario(novoNome);
+                        usuarioService.salvarUsuario(novoUsuario);
+                        usuarioResponsavel = novoUsuario;
+                        System.out.println("Usuário cadastrado com sucesso!");
+                        break;
+                    default:
+                        System.out.println("Opção inválida. Tente novamente.");
                 }
             } else {
                 System.out.println("Usuários encontrados:");
@@ -96,17 +96,38 @@ public class TarefaService
                 }
 
                 System.out.println("Escolha um usuário pelo número correspondente:");
-                int escolhaUsuario = scanner.nextInt();
-                scanner.nextLine(); // Consumir quebra de linha
+                String escolhaUsuarioStr = scanner.nextLine();
+                int escolhaUsuario;
+
+                try {
+                    escolhaUsuario = Integer.parseInt(escolhaUsuarioStr);
+                } catch (NumberFormatException e) {
+                    System.out.println("Opção inválida. Tente novamente.");
+                    continue;
+                }
 
                 if (escolhaUsuario > 0 && escolhaUsuario <= usuariosEncontrados.size()) {
                     usuarioResponsavel = usuariosEncontrados.get(escolhaUsuario - 1);
                 } else {
                     System.out.println("Opção inválida. Tente novamente.");
+                    usuarioResponsavel = null;
                 }
             }
         }
+        return usuarioResponsavel; // Agora há sempre um retorno válido do tipo Usuario
+    }
 
+    public void cadastrarTarefa(UsuarioService usuarioService, TarefaService tarefaService) {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("Digite o nome da tarefa: ");
+        String titulo = scanner.nextLine();
+
+        System.out.println("Insira a descrição da tarefa: ");
+        String descricao = scanner.nextLine();
+
+        Usuario usuarioResponsavel = tarefaService.buscarUsuarioPorNome(usuarioService, tarefaService, scanner);
+    
         Prioridades prioridade = null;
         while (prioridade == null) {
             System.out.println("Qual a prioridade da tarefa? (ALTA, MEDIA, BAIXA)");
