@@ -145,7 +145,7 @@ public class TarefaService
 
         tarefaService.salvar(tarefa);
 
-        System.out.println("Tarefa cadastrada com sucesso para a data: " + dataConclusaoPrevista.format(formatter));
+        System.out.println("Tarefa cadastrada com sucesso");
     }
 }
 
