@@ -5,7 +5,6 @@ import com.crud.esig.model.Tarefa;
 import com.crud.esig.model.Usuario;
 import com.crud.esig.repository.TarefaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -270,6 +269,47 @@ public class TarefaService
 
         tarefaRepository.save(tarefa);
         System.out.println("Tarefa atualizada com sucesso!");
+    }
+
+    public void deletarTarefa(UsuarioService usuarioService) 
+    {
+
+        System.out.println("Digite o nome do usuário responsável pela tarefa: ");
+        Usuario usuarioBuscado = usuarioService.buscarUsuarioPorNome(usuarioService, this, scanner);
+
+        List<Tarefa> tarefas = listarTodas()
+                .stream()
+                .filter(t -> t.getUsuarioResponsavel().getId().equals(usuarioBuscado.getId()))
+                .toList();
+                
+        if (tarefas.isEmpty()) {
+            System.out.println("Nenhuma tarefa encontrada para o usuário " + usuarioBuscado.getNome());
+            return;
+        }
+
+        System.out.println("Tarefas encontradas para o usuário " + usuarioBuscado.getNome() + ":");
+        for (Tarefa tarefa : tarefas) {
+            System.out.println("\n");
+            System.out.println(tarefa.toString());
+        }
+
+        System.out.println("Digite o ID da tarefa que deseja deletar: ");
+        Long id = scanner.nextLong();
+        scanner.nextLine();
+
+        Tarefa tarefa = listarTodas()
+                .stream()
+                .filter(t -> t.getId().equals(id))
+                .findFirst()
+                .orElse(null);
+
+        if (tarefa == null) {
+            System.out.println("Tarefa não encontrada.");
+            return;
+        }
+
+        tarefaRepository.deleteById(id);
+        System.out.println("Tarefa deletada com sucesso!");
     }
 
 }

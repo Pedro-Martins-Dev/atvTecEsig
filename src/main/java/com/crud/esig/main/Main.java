@@ -1,6 +1,5 @@
 package com.crud.esig.main;
 
-import com.crud.esig.model.Usuario;
 import com.crud.esig.service.TarefaService;
 import com.crud.esig.service.UsuarioService;
 import org.springframework.stereotype.Component;
@@ -31,23 +30,29 @@ public class Main {
                     1 - Cadastrar um usuário
                     2 - Cadastrar tarefa
                     3 - Atualizar status da tarefa
+                    4 - Deletar tarefa
                     0 - Sair""");
 
             opcao = scanner.nextInt();
             scanner.nextLine();
 
-            switch (opcao) {
+            switch (opcao) 
+            {
                 case 1:
 
                     usuarioService.cadastrarUsuario();
-                    break;
+                    break;   
                 case 2:
+
                     tarefaService.cadastrarTarefa(usuarioService, tarefaService);
-
                     break;
-
                     case 3:
                     tarefaService.atualizarTarefa(usuarioService);
+                    break;
+                case 4:
+
+                    tarefaService.deletarTarefa(usuarioService);
+                    break;
                 case 0:
                     System.out.println("Saindo...");
                     break;
