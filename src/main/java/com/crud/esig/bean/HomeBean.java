@@ -1,15 +1,22 @@
 package com.crud.esig.bean;
 
-import jakarta.enterprise.context.RequestScoped;
+import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
+import java.io.Serializable;
 
-@Named
-@RequestScoped
-public class HomeBean
-{
+@Named("homeBean")
+@ViewScoped
+public class HomeBean implements Serializable {
 
-    public String home()
-    {
-        return "home?faces-redirect=true";
+    private static final long serialVersionUID = 1L;
+
+    private String mensagem = "Bem-vindo ao sistema ESIG!";
+
+    public String getMensagem() {
+        return mensagem;
+    }
+
+    public void setMensagem(String mensagem) {
+        this.mensagem = mensagem;
     }
 }
