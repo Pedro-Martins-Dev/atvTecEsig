@@ -140,7 +140,7 @@ public class Tarefa
             "- Cadastro: %s\n" +
             "- Previsão de Conclusão: %s\n" +
             "- Conclusão: %s",
-            id, titulo, descricao, prioridade, status, usuarioResponsavel, dataCadastro, dataConclusaoPrevista,
+            id, titulo, descricao, prioridade, status, usuarioResponsavel.getNome(), dataCadastro, dataConclusaoPrevista,
             (dataConclusao != null ? dataConclusao : "Tarefa ainda não concluída")
         );
     }

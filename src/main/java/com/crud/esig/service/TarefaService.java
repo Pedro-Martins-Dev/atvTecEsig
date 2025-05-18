@@ -3,314 +3,157 @@ package com.crud.esig.service;
 import com.crud.esig.enuns.*;
 import com.crud.esig.model.Tarefa;
 import com.crud.esig.model.Usuario;
-import com.crud.esig.repository.TarefaRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
+import jakarta.enterprise.context.SessionScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
+
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Scanner;
+import java.util.stream.Collectors;
 
-@Service
-public class TarefaService
-{
-    private static final Scanner scanner = new Scanner(System.in);
+@Named
+@SessionScoped
+@Transactional
+public class TarefaService implements Serializable {
 
-    @Autowired
-    private TarefaRepository tarefaRepository;
+    private static final long serialVersionUID = 1L;
 
-    public List<Tarefa> listarTodas()
-    {
-        return tarefaRepository.findAll();
+    @PersistenceContext(unitName = "SeuPU") // nome do persistence unit configurado no persistence.xml
+    private EntityManager em;
+
+    @Inject
+    private UsuarioService usuarioService; // injete seu service de usuário também via CDI
+
+    // Propriedades para formularios JSF
+    private Tarefa tarefaSelecionada = new Tarefa();
+    private String tituloPesquisa;
+
+    // Listar todas tarefas
+    public List<Tarefa> listarTodas() {
+        return em.createQuery("SELECT t FROM Tarefa t", Tarefa.class)
+                .getResultList()
+                .stream()
+                .sorted(Comparator.comparing(t -> t.getUsuarioResponsavel().getNome()))
+                .collect(Collectors.toList());
     }
 
-    public List<Tarefa> buscarPorTitulo(String titulo)
-    {
-        return tarefaRepository.findByTituloContaining(titulo);
+    // Buscar tarefas por título
+    public List<Tarefa> buscarPorTitulo() {
+        if (tituloPesquisa == null || tituloPesquisa.trim().isEmpty()) {
+            return listarTodas();
+        }
+        return em.createQuery("SELECT t FROM Tarefa t WHERE LOWER(t.titulo) LIKE :titulo", Tarefa.class)
+                .setParameter("titulo", "%" + tituloPesquisa.toLowerCase() + "%")
+                .getResultList();
     }
 
-    public Tarefa salvar(Tarefa tarefa)
-    {
-        return tarefaRepository.save(tarefa);
+    // Salvar ou atualizar tarefa
+    public String salvar() {
+        if (tarefaSelecionada.getId() == null) {
+            em.persist(tarefaSelecionada);
+        } else {
+            em.merge(tarefaSelecionada);
+        }
+        limparFormulario();
+        return "listarTarefas?faces-redirect=true"; // redirecionar para a lista após salvar
     }
 
-    public void deletar(Long id)
-    {
-        tarefaRepository.deleteById(id);
+    // Deletar tarefa
+    public void deletar(Tarefa tarefa) {
+        Tarefa t = em.find(Tarefa.class, tarefa.getId());
+        if (t != null) {
+            em.remove(t);
+        }
     }
 
-    public void cadastrarTarefa(UsuarioService usuarioService, TarefaService tarefaService) {
-        Scanner scanner = new Scanner(System.in);
+    // Preparar novo cadastro
+    public String prepararCadastro() {
+        tarefaSelecionada = new Tarefa();
+        return "cadastrarTarefa?faces-redirect=true";
+    }
 
-        System.out.println("Digite o nome da tarefa: ");
-        String titulo = scanner.nextLine();
+    // Preparar edição
+    public String prepararEdicao(Tarefa tarefa) {
+        this.tarefaSelecionada = tarefa;
+        return "editarTarefa?faces-redirect=true";
+    }
 
-        System.out.println("Insira a descrição da tarefa: ");
-        String descricao = scanner.nextLine();
+    // Limpar formulário
+    public void limparFormulario() {
+        tarefaSelecionada = new Tarefa();
+    }
 
-        Usuario usuarioResponsavel = usuarioService.buscarUsuarioPorNome(usuarioService, tarefaService, scanner);
-    
-        Prioridades prioridade = null;
-        while (prioridade == null) {
-            System.out.println("Qual a prioridade da tarefa? (ALTA, MEDIA, BAIXA)");
-            String prioridadeString = scanner.nextLine().toUpperCase();
+    // Getters e Setters para JSF
 
-            try {
-                prioridade = Prioridades.valueOf(prioridadeString);
-            } catch (IllegalArgumentException e) {
-                System.out.println("""
-                        Só trabalhamos com três tipos de prioridade:
-                        
-                        ALTA
-                        MEDIA
-                        BAIXA
-                        
-                        Por favor, insira uma prioridade válida.
-                        """);
+    public Tarefa getTarefaSelecionada() {
+        return tarefaSelecionada;
+    }
+
+    public void setTarefaSelecionada(Tarefa tarefaSelecionada) {
+        this.tarefaSelecionada = tarefaSelecionada;
+    }
+
+    public String getTituloPesquisa() {
+        return tituloPesquisa;
+    }
+
+    public void setTituloPesquisa(String tituloPesquisa) {
+        this.tituloPesquisa = tituloPesquisa;
+    }
+
+    // Métodos para lidar com datas no formato String (para input text em JSF)
+
+    public String getDataConclusaoPrevistaString() {
+        if (tarefaSelecionada.getDataConclusaoPrevista() != null) {
+            return tarefaSelecionada.getDataConclusaoPrevista().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        }
+        return "";
+    }
+
+    public void setDataConclusaoPrevistaString(String data) {
+        try {
+            if (data != null && !data.trim().isEmpty()) {
+                tarefaSelecionada.setDataConclusaoPrevista(LocalDate.parse(data, DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+            } else {
+                tarefaSelecionada.setDataConclusaoPrevista(null);
             }
-        };
+        } catch (DateTimeParseException e) {
+            // tratar erro no frontend JSF via mensagem
+        }
+    }
 
-        LocalDate dataConclusaoPrevista = null;
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    public String getDataConclusaoString() {
+        if (tarefaSelecionada.getDataConclusao() != null) {
+            return tarefaSelecionada.getDataConclusao().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        }
+        return "";
+    }
 
-        while (dataConclusaoPrevista == null) {
-            System.out.println("Insira a data de conclusão prevista (dd/MM/yyyy): ");
-            String dataString = scanner.nextLine();
-
-            try {
-                dataConclusaoPrevista = LocalDate.parse(dataString, formatter);
-            } catch (DateTimeParseException e) {
-                System.out.println("Erro: Data inválida! Certifique-se de usar o formato correto (dd/MM/yyyy).");
+    public void setDataConclusaoString(String data) {
+        try {
+            if (data != null && !data.trim().isEmpty()) {
+                tarefaSelecionada.setDataConclusao(LocalDate.parse(data, DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+            } else {
+                tarefaSelecionada.setDataConclusao(null);
             }
-        }
-
-        Tarefa tarefa = new Tarefa(titulo, descricao, prioridade, usuarioResponsavel, dataConclusaoPrevista);
-
-        tarefaService.salvar(tarefa);
-
-        System.out.println("Tarefa cadastrada com sucesso");
-    }
-
-    public String atualizarNomeTarefa()
-    {
-        System.out.println("Digite o novo nome da tarefa: ");
-        String novoNome = scanner.nextLine();
-
-        return novoNome;
-    }
-
-    public String atualizarDescricaoTarefa()
-    {
-        System.out.println("Digite a nova descrição da tarefa: ");
-        String novaDescricao = scanner.nextLine();
-
-
-        return novaDescricao;
-    }
-
-    public Prioridades atualizarPrioridadeTarefa()
-    {
-        System.out.println("Digite a nova prioridade da tarefa (ALTA, MEDIA, BAIXA): ");
-        String novaPrioridade = scanner.nextLine().toUpperCase();
-
-        try
-        {
-            return Prioridades.valueOf(novaPrioridade);
-        }
-        catch (IllegalArgumentException e)
-        {
-            System.out.println("Prioridade inválida. Tente novamente.");
-            return atualizarPrioridadeTarefa();
+        } catch (DateTimeParseException e) {
+            // tratar erro no frontend JSF via mensagem
         }
     }
 
-    public LocalDate atualizarDataConclusaoPrevistaTarefa()
-    {
-        System.out.println("Digite a nova data de conclusão (dd/MM/yyyy): ");
-        String novaDataString = scanner.nextLine();
-        LocalDate novaDataConclusao = null;
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-
-        try
-        {
-            novaDataConclusao = LocalDate.parse(novaDataString, formatter);
-        }
-        catch (DateTimeParseException e)
-        {
-            System.out.println("Data inválida. Tente novamente.");
-            return atualizarDataConclusaoPrevistaTarefa();
-        }
-        return novaDataConclusao;
+    public Prioridades[] getPrioridades() {
+        return Prioridades.values();
     }
 
-    public LocalDate atualizarDataConclusaoTarefa()
-    {
-        System.out.println("Digite a nova data de conclusão (dd/MM/yyyy): ");
-        String novaDataString = scanner.nextLine();
-        LocalDate novaDataConclusao = null;
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-
-        try
-        {
-            novaDataConclusao = LocalDate.parse(novaDataString, formatter);
-        }
-        catch (DateTimeParseException e)
-        {
-            System.out.println("Data inválida. Tente novamente.");
-            return atualizarDataConclusaoTarefa();
-        }
-        return novaDataConclusao;
+    public Status[] getStatus() {
+        return Status.values();
     }
-
-    public Status atualizarStatusTarefa()
-    {
-        System.out.println("Qual o status da tarefa? (CONCLUIDA, EM ANDAMENTO OU PENDENTE): ");
-        String statusString = scanner.nextLine().toUpperCase();
-
-        try
-        {
-            return Status.valueOf(statusString);
-        }
-        catch (IllegalArgumentException e)
-        {
-            System.out.println("Status inválido. Tente novamente.");
-            return atualizarStatusTarefa();
-        }
-    }
-
-    public void atualizarTarefa(UsuarioService usuarioService) 
-    {
-        Scanner scanner = new Scanner(System.in);
-
-        System.out.println("Digite o nome do usuário responsável pela tarefa: ");
-        Usuario usuarioBuscado = usuarioService.buscarUsuarioPorNome(usuarioService, this, scanner);
-
-        List<Tarefa> tarefas = listarTodas()
-                .stream()
-                .filter(t -> t.getUsuarioResponsavel().getId().equals(usuarioBuscado.getId()))
-                .toList();
-        if (tarefas.isEmpty()) {
-            System.out.println("Nenhuma tarefa encontrada para o usuário " + usuarioBuscado.getNome());
-            return;
-        }
-
-        System.out.println("Tarefas encontradas para o usuário " + usuarioBuscado.getNome() + ":");
-        for (Tarefa tarefa : tarefas) {
-            System.out.println("\n");
-            System.out.println(tarefa.toString());
-        }
-
-        System.out.println("Digite o ID da tarefa que deseja atualizar: ");
-        Long id = scanner.nextLong();
-        scanner.nextLine();
-
-        Tarefa tarefa = listarTodas()
-                .stream()
-                .filter(t -> t.getId().equals(id))
-                .findFirst()
-                .orElse(null);
-
-        if (tarefa == null) {
-            System.out.println("Tarefa não encontrada.");
-            return;
-        }
-
-        int opcoes = -1;
-
-        while (opcoes != 0) {
-            System.out.println("""
-                    O que você deseja atualizar?
-
-                    1 - Nome
-                    2 - Descrição
-                    3 - Prioridade
-                    4 - Data de conclusão prevista
-                    5 - Data de conclusão
-                    6 - Status
-                    0 - Sair""");
-
-            opcoes = scanner.nextInt();
-            scanner.nextLine();
-
-            switch (opcoes) {
-                case 1:
-                    tarefa.setTitulo(atualizarNomeTarefa());
-                    break;
-                case 2:
-                    tarefa.setDescricao(atualizarDescricaoTarefa());
-                    break;
-                case 3:
-                    tarefa.setPrioridade(atualizarPrioridadeTarefa());
-                    break;
-                case 4:
-                    tarefa.setDataConclusaoPrevista(atualizarDataConclusaoPrevistaTarefa());
-                    break;
-                case 5:
-                    tarefa.setDataConclusao(atualizarDataConclusaoTarefa());
-                    if (tarefa.getDataConclusao() != null)
-                        tarefa.setStatus(Status.CONCLUIDA);
-                    else
-                        tarefa.setStatus(Status.PENDENTE);
-                    break;
-                case 6:
-                    tarefa.setStatus(atualizarStatusTarefa());
-                    if (tarefa.getStatus() == Status.CONCLUIDA)
-                        tarefa.setDataConclusao(LocalDate.now());
-                    break;
-                case 0:
-                    System.out.println("Saindo...");
-                    break;
-                default:
-                    System.out.println("Opção inválida.");
-            }
-        }
-
-        tarefaRepository.save(tarefa);
-        System.out.println("Tarefa atualizada com sucesso!");
-    }
-
-    public void deletarTarefa(UsuarioService usuarioService) 
-    {
-
-        System.out.println("Digite o nome do usuário responsável pela tarefa: ");
-        Usuario usuarioBuscado = usuarioService.buscarUsuarioPorNome(usuarioService, this, scanner);
-
-        List<Tarefa> tarefas = listarTodas()
-                .stream()
-                .filter(t -> t.getUsuarioResponsavel().getId().equals(usuarioBuscado.getId()))
-                .toList();
-                
-        if (tarefas.isEmpty()) {
-            System.out.println("Nenhuma tarefa encontrada para o usuário " + usuarioBuscado.getNome());
-            return;
-        }
-
-        System.out.println("Tarefas encontradas para o usuário " + usuarioBuscado.getNome() + ":");
-        for (Tarefa tarefa : tarefas) {
-            System.out.println("\n");
-            System.out.println(tarefa.toString());
-        }
-
-        System.out.println("Digite o ID da tarefa que deseja deletar: ");
-        Long id = scanner.nextLong();
-        scanner.nextLine();
-
-        Tarefa tarefa = listarTodas()
-                .stream()
-                .filter(t -> t.getId().equals(id))
-                .findFirst()
-                .orElse(null);
-
-        if (tarefa == null) {
-            System.out.println("Tarefa não encontrada.");
-            return;
-        }
-
-        tarefaRepository.deleteById(id);
-        System.out.println("Tarefa deletada com sucesso!");
-    }
-
 }
-

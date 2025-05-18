@@ -1,26 +1,16 @@
-package com.crud.esig;
+package com.crud.esig.config;
 
-import com.crud.esig.main.Main;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Named;
 
-@SpringBootApplication
-public class Application implements CommandLineRunner {
-	private final Main main;
+@ApplicationScoped
+@Named("applicationBean")
+public class Application {
 
-	@Autowired
-	public Application(Main main) {
-		this.main = main;
+	@PostConstruct
+	public void init() {
+		System.out.println("Aplicação JSF carregada no WildFly.");
 	}
 
-	public static void main(String[] args) {
-		SpringApplication.run(Application.class, args);
-	}
-
-	@Override
-	public void run(String... args) {
-		main.menu();
-	}
 }
