@@ -2,12 +2,12 @@ package com.crud.esig.service;
 
 import com.crud.esig.model.Usuario;
 
-import jakarta.enterprise.context.RequestScoped;
-import jakarta.inject.Named;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.TypedQuery;
-import jakarta.transaction.Transactional;
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Named;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
+import javax.transaction.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -38,6 +38,9 @@ public class UsuarioService {
         }
     }
 
+    public List<Usuario> listarTodos() {
+        return entityManager.createQuery("SELECT u FROM Usuario u", Usuario.class).getResultList();
+    }
 
     @Transactional
     public Usuario salvarUsuario(Usuario usuario) {
@@ -48,6 +51,7 @@ public class UsuarioService {
             return entityManager.merge(usuario);
         }
     }
+
     @Transactional
     public void deletar(Long id) {
         Usuario usuario = buscarPorId(id);
@@ -61,10 +65,7 @@ public class UsuarioService {
                 "SELECT u FROM Usuario u WHERE u.nome = :nome", Usuario.class);
         query.setParameter("nome", nome);
         List<Usuario> result = query.getResultList();
-        if (result.isEmpty()) {
-            return Optional.empty();
-        }
-        return Optional.of(result.get(0));
+        return result.isEmpty() ? Optional.empty() : Optional.of(result.get(0));
     }
 
     public List<Usuario> buscarPorNomeContendo(String nomeParcial) {
@@ -76,9 +77,6 @@ public class UsuarioService {
 
     public Usuario buscarUsuarioPorNomeInterativo(String nomeParcial) {
         List<Usuario> usuariosEncontrados = buscarPorNomeContendo(nomeParcial);
-        if (usuariosEncontrados.isEmpty()) {
-            return null;
-        }
-        return usuariosEncontrados.get(0);
+        return usuariosEncontrados.isEmpty() ? null : usuariosEncontrados.get(0);
     }
 }

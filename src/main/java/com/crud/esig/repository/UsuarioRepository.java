@@ -1,19 +1,18 @@
 package com.crud.esig.repository;
 
 import com.crud.esig.model.Usuario;
-
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.NoResultException;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.TypedQuery;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.TypedQuery;
 import java.util.List;
 import java.util.Optional;
 
 @ApplicationScoped
 public class UsuarioRepository {
 
-    @PersistenceContext(unitName = "SeuPU")
+    @Inject
     private EntityManager em;
 
     public Optional<Usuario> findByNome(String nome) {

@@ -1,12 +1,12 @@
 package com.crud.esig.bean;
 
-import jakarta.faces.view.ViewScoped;
-import jakarta.inject.Named;
+import javax.faces.view.ViewScoped;
+import javax.inject.Named;
 import java.io.Serializable;
 
 @Named("homeBean")
 @ViewScoped
-public class HomeBean implements Serializable {
+public class IndexBean implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

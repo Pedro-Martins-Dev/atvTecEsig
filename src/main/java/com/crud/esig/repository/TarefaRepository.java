@@ -1,17 +1,15 @@
 package com.crud.esig.repository;
 
 import com.crud.esig.model.Tarefa;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.TypedQuery;
-import jakarta.ejb.Stateless;
-
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
 import java.util.List;
 
-@Stateless
+@ApplicationScoped
 public class TarefaRepository {
 
-    @PersistenceContext(unitName = "SeuPU")
+    @Inject
     private EntityManager em;
 
     public List<Tarefa> findAll() {
@@ -19,10 +17,9 @@ public class TarefaRepository {
     }
 
     public List<Tarefa> findByTituloContaining(String titulo) {
-        TypedQuery<Tarefa> query = em.createQuery(
-                "SELECT t FROM Tarefa t WHERE t.titulo LIKE :titulo", Tarefa.class);
-        query.setParameter("titulo", "%" + titulo + "%");
-        return query.getResultList();
+        return em.createQuery("SELECT t FROM Tarefa t WHERE t.titulo LIKE :titulo", Tarefa.class)
+                .setParameter("titulo", "%" + titulo + "%")
+                .getResultList();
     }
 
     public Tarefa save(Tarefa tarefa) {

@@ -1,8 +1,8 @@
 package com.crud.esig.bean;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Named;
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Named;
 
 @ApplicationScoped
 @Named("applicationBean")
